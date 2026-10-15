@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Take a Bite — A Boneless Wing Story</title>
+<style>
+:root{--bg:#0d0810;--ink:#fff4e6;--acc:#ff4f8b;--box:rgba(30,12,28,.88)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#stage{position:relative;width:min(100vw,177.7vh);aspect-ratio:16/9;overflow:hidden;background:#000;user-select:none;cursor:pointer;container-type:inline-size;--u:1cqw;touch-action:manipulation}
+#stage canvas,.layer{object-fit:cover;position:absolute;inset:0;width:100%;height:100%}
+#chars{position:absolute;inset:0}
+.ch{position:absolute;bottom:-6%;height:96%;width:30%;transform:translateX(-50%);transition:left .4s,opacity .4s;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.ch svg{width:100%;height:100%}
+#box{position:absolute;left:4%;right:4%;bottom:7%;min-height:25%;padding:3.4% 4% 2%;border:calc(.4*var(--u)) solid var(--acc);border-radius:calc(1.4*var(--u));background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence baseFrequency='.8'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23f)' opacity='.12'/%3E%3C/svg%3E"),linear-gradient(rgba(22,8,22,.94),rgba(22,8,22,.94));text-shadow:0 calc(.15*var(--u)) calc(.3*var(--u)) #000;font-size:calc(2.2*var(--u));line-height:1.5;box-shadow:0 0 calc(3*var(--u)) rgba(255,79,139,.35)}
+#name{position:absolute;top:calc(-3.6*var(--u));left:calc(2.5*var(--u));padding:calc(.5*var(--u)) calc(2.4*var(--u));background:var(--acc);color:#2a0615;font-weight:800;border-radius:calc(1*var(--u)) calc(1*var(--u)) 0 0;font-size:calc(2.2*var(--u));letter-spacing:.1em}
+#txt.nar{font-style:italic;opacity:.92}
+#next{position:absolute;right:calc(2*var(--u));bottom:calc(.8*var(--u));animation:b 1s infinite;color:var(--acc)}
+@keyframes b{50%{transform:translateY(calc(.5*var(--u)))}}
+#choices{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:calc(1.6*var(--u));background:rgba(0,0,0,.45)}
+#choices button,.btn{font:inherit;font-size:calc(2.3*var(--u));padding:calc(1*var(--u)) calc(3*var(--u));min-width:calc(44*var(--u));max-width:86%;border:calc(.3*var(--u)) solid var(--acc);background:rgba(40,10,34,.92);color:var(--ink);border-radius:calc(1.2*var(--u));cursor:pointer;transition:.15s}
+#choices button:hover,.btn:hover{background:var(--acc);color:#2a0615;transform:scale(1.03)}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(1.4*var(--u));text-align:center;background:radial-gradient(#2a0f2acc,#07030aee);z-index:5}
+.ov h1{font-size:calc(6.4*var(--u));margin:0;line-height:1;letter-spacing:.04em;color:#ffd9a0;text-shadow:calc(.4*var(--u)) calc(.4*var(--u)) 0 var(--acc),calc(-.2*var(--u)) calc(-.2*var(--u)) 0 #3ee;font-family:Impact,"Arial Black",sans-serif}
+.ov p{margin:0;font-size:calc(1.9*var(--u));max-width:70%;opacity:.85}
+#warn{font-size:calc(1.5*var(--u))!important;opacity:.6!important}
+#end{display:none}
+#end h2{font-size:calc(4.6*var(--u));margin:0;color:#ffd9a0}
+.glitch #txt,.glitch #name{animation:g .25s infinite;text-shadow:calc(.3*var(--u)) 0 #f0f,calc(-.3*var(--u)) 0 #0ff}
+.glitch .ch.w{animation:g .2s infinite}
+@keyframes g{0%{transform:translate(0)}25%{transform:translate(calc(-.5*var(--u)),calc(.2*var(--u)))}50%{transform:translate(calc(.4*var(--u)),calc(-.2*var(--u)))}75%{transform:translate(calc(-.2*var(--u)),calc(-.3*var(--u)))}100%{transform:translate(0)}}
+#txt{min-height:calc(5.4*var(--u))}
+.hide{display:none!important}
+
+.p-l{left:20%}.p-c{left:50%}.p-r{left:80%}
+#qm{position:absolute;left:0;right:0;bottom:1%;display:flex;justify-content:center;gap:calc(3*var(--u));z-index:3}
+#qm button{font:inherit;font-size:calc(1.8*var(--u));background:none;border:0;color:#e8cfe0;cursor:pointer;padding:calc(.4*var(--u)) calc(1*var(--u));text-shadow:0 0 calc(.5*var(--u)) #000}
+#qm button:hover,#qm button.on{color:var(--acc)}
+#gm{position:absolute;inset:0;display:none;z-index:9;background:rgba(18,6,22,.97);font-size:calc(2*var(--u))}
+#gn{display:flex;flex-direction:column;gap:calc(1*var(--u));padding:calc(3*var(--u)) calc(2*var(--u));min-width:calc(22*var(--u));background:rgba(255,79,139,.14)}
+#gn button{font:inherit;font-size:calc(2*var(--u));text-align:left;padding:calc(1*var(--u)) calc(1.6*var(--u));background:none;border:0;border-left:calc(.5*var(--u)) solid transparent;color:var(--ink);cursor:pointer}
+#gn button.on,#gn button:hover{color:var(--acc);border-color:var(--acc)}
+#gc{flex:1;overflow:auto;padding:calc(3*var(--u));min-width:0}
+#gc h3{margin:0 0 calc(1.6*var(--u));font-size:calc(3.2*var(--u));color:#ffd9a0}#gc p{margin:0}
+#gc label{display:block;margin:calc(1.4*var(--u)) 0}#gc input[type=range]{width:100%;accent-color:var(--acc)}
+#gc .btn{min-width:0;font-size:calc(2*var(--u));padding:calc(.8*var(--u)) calc(2*var(--u));margin:calc(1*var(--u)) calc(1*var(--u)) 0 0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(1.6*var(--u))}
+.sl{border:calc(.3*var(--u)) solid var(--acc);border-radius:calc(1*var(--u));background:rgba(255,255,255,.05);padding:calc(.8*var(--u));cursor:pointer;font-size:calc(1.6*var(--u))}
+.sl:hover{background:rgba(255,79,139,.25)}.sl img,.sl .em{width:100%;aspect-ratio:16/9;display:block;border-radius:calc(.6*var(--u));background:#000;object-fit:cover}
+.sl .em{display:flex;align-items:center;justify-content:center;opacity:.6}.sl b,.sl i{display:block;margin-top:calc(.5*var(--u));overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pgr button{font:inherit;margin:calc(1.6*var(--u)) calc(1*var(--u)) 0 0;padding:calc(.6*var(--u)) calc(1.8*var(--u));background:none;border:calc(.3*var(--u)) solid var(--acc);color:var(--ink);border-radius:calc(1*var(--u));cursor:pointer}.pgr .on{background:var(--acc);color:#2a0615}
+@media (orientation:portrait){#stage{width:100vw;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));aspect-ratio:auto;--u:2.1cqw}
+.ch{width:54%;height:66%;bottom:19%}.p-l{left:27%}.p-r{left:73%}#box{bottom:6.5%}.ov p{max-width:88%}#choices button{min-width:72%}
+#gm{flex-direction:column}#gn{flex-direction:row;flex-wrap:wrap;min-width:0;padding:calc(1.5*var(--u))}#gn button{border-left:0;padding:calc(.8*var(--u)) calc(1.4*var(--u));font-size:calc(1.9*var(--u))}.sg{grid-template-columns:repeat(2,1fr)}#qm{gap:calc(2*var(--u))}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<filter id="grain"><feTurbulence baseFrequency=".8" numOctaves="3" result="t"/><feColorMatrix in="t" type="saturate" values="0" result="g"/><feComposite in="g" in2="SourceGraphic" operator="in" result="gi"/><feBlend in="SourceGraphic" in2="gi" mode="multiply"/></filter>
+<filter id="crisp" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence baseFrequency=".06" numOctaves="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="14" result="d"/><feTurbulence baseFrequency=".5" numOctaves="2" result="t"/><feColorMatrix in="t" type="saturate" values="0" result="g"/><feComposite in="g" in2="d" operator="in" result="gi"/><feBlend in="d" in2="gi" mode="multiply"/></filter>
+</defs></svg>
+<div id="stage">
+<canvas id="bg" width="1280" height="720"></canvas>
+<div id="chars"></div>
+<canvas id="fx" width="1280" height="720" class="hide"></canvas>
+<div id="box" class="hide"><div id="name"></div><div id="txt"></div><span id="next">▼</span></div>
+<div id="choices"></div><div id="qm" class="hide"><button id="qa">Auto</button><button id="qk">Skip</button><button data-g="save">Save</button><button data-g="load">Load</button><button data-g="pf">Prefs</button></div><div id="gm"><div id="gn"><button data-t="pf">Preferences</button><button data-t="save">Save</button><button data-t="load">Load</button><button data-t="end">Endings</button><button id="gmm">Main Menu</button><button id="gr">Return</button></div><div id="gc"></div></div>
+<div id="title" class="ov"><h1>TAKE A BITE</h1><p>A boneless wing visual novel.</p><button class="btn" id="go">New Game</button><button class="btn" id="tl">Load</button><button class="btn" id="tp">Preferences</button><p id="warn">Warning: contains sauce, singularities and the end of the world. Not suitable for anyone who owns a planet.</p></div>
+<div id="end" class="ov"><p id="en"></p><h2 id="et"></h2><p id="el"></p><button class="btn" id="again">Play again</button></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const bgc=$('bg'),bx=bgc.getContext('2d');
+function grain(c,a){const d=c.getImageData(0,0,1280,720),p=d.data;for(let i=0;i<p.length;i+=4){const n=(Math.random()-.5)*a;p[i]+=n;p[i+1]+=n;p[i+2]+=n}c.putImageData(d,0,0)}
+function vig(c){const g=c.createRadialGradient(640,360,200,640,360,800);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.65)');c.fillStyle=g;c.fillRect(0,0,1280,720)}
+const BG={
+diner(c){
+ c.fillStyle='#2f8a86';c.fillRect(0,0,1280,720);
+ for(let x=0;x<1280;x+=48){c.fillStyle='rgba(255,255,255,.07)';c.fillRect(x,0,24,400)}
+ let g=c.createLinearGradient(0,60,0,300);g.addColorStop(0,'#1b1040');g.addColorStop(1,'#4a2a6a');
+ c.fillStyle='#e9dcc0';c.fillRect(90,70,420,250);c.fillStyle=g;c.fillRect(104,84,392,222);
+ c.fillStyle='#fff';for(let i=0;i<40;i++)c.fillRect(110+Math.random()*380,90+Math.random()*130,2,2);
+ c.fillStyle='#e9dcc0';c.fillRect(298,84,8,222);
+ c.fillStyle='#6b3a22';c.fillRect(0,380,1280,90);
+ for(let y=384;y<470;y+=6){c.fillStyle=`rgba(${20+Math.random()*40},10,0,.25)`;c.fillRect(0,y,1280,2)}
+ c.fillStyle='#9a5a30';c.fillRect(0,470,1280,36);c.fillStyle='#c98b55';c.fillRect(0,470,1280,6);
+ for(let r=0,y=506;y<720;r++){const h=18+r*7;for(let x=-200,i=0;x<1480;x+=h*2.2,i++){c.fillStyle=(i+r)%2?'#f3ead8':'#c43b4f';c.fillRect(x-r*14,y,h*2.2,h)}y+=h}
+ c.shadowColor='#ff4f8b';c.shadowBlur=30;c.fillStyle='#ffd0e4';c.textAlign='center';c.font='bold 64px Impact,sans-serif';c.fillText('WINGSTEAD',640,140);c.font='bold 40px Impact,sans-serif';c.fillText('OPEN 24/7',640,190);c.textAlign='left';c.shadowBlur=0;
+ c.fillStyle='rgba(255,170,60,.12)';c.fillRect(0,0,1280,720);grain(c,36);vig(c)},
+back(c){c.fillStyle='#8d9aa0';c.fillRect(0,0,1280,720);c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=2;for(let x=0;x<1280;x+=80)for(let y=0;y<720;y+=80)c.strokeRect(x,y,80,80);let g=c.createRadialGradient(900,300,20,900,300,500);g.addColorStop(0,'rgba(255,150,40,.5)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,1280,720);c.fillStyle='#4a5258';c.fillRect(0,560,1280,160);grain(c,32);vig(c)},
+space(c){let g=c.createLinearGradient(0,0,0,720);g.addColorStop(0,'#02030a');g.addColorStop(1,'#10082a');c.fillStyle=g;c.fillRect(0,0,1280,720);
+ for(let i=0;i<260;i++){c.fillStyle=`rgba(255,255,255,${Math.random()})`;c.fillRect(Math.random()*1280,Math.random()*720,Math.random()*2.5,Math.random()*2.5)}grain(c,14)}};
+let curBG='diner';function setBG(k){curBG=k;BG[k](bx)}
+
+const C={
+M:{n:'Mika',h:'#e8743b',s:'#f4f0e6',k:'#f6d3b8',t:'pony'},
+N:{n:'Noor',h:'#1f7a7a',s:'#6b5bd6',k:'#c68a62',t:'bob'},G:{n:'Gus',h:'#5a3a1e',s:'#f5f5f5',k:'#d9a07a',t:'bob'},K:{n:'Kell',h:'#15151c',s:'#23232f',k:'#e9c9a8',t:'bob'}};
+function face(e,k){
+ const eye=(x)=>({
+  happy:`<path d="M${x-14} 250 Q${x} 232 ${x+14} 250" stroke="#2a1420" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+  sad:`<ellipse cx="${x}" cy="248" rx="9" ry="13" fill="#2a1420"/><circle cx="${x+3}" cy="243" r="3.5" fill="#fff"/><path d="M${x-14} 222 L${x+14} 232" stroke="#2a1420" stroke-width="4"/>`,
+  shock:`<circle cx="${x}" cy="248" r="16" fill="#fff" stroke="#2a1420" stroke-width="3"/><circle cx="${x}" cy="248" r="4" fill="#2a1420"/>`,
+  smirk:`<ellipse cx="${x}" cy="248" rx="10" ry="12" fill="#2a1420"/><path d="M${x-14} 241 L${x+14} 241" stroke="${k}" stroke-width="9"/><circle cx="${x+3}" cy="246" r="3" fill="#fff"/>`,
+  blank:`<circle cx="${x}" cy="248" r="5" fill="#2a1420"/>`}[e]);
+ const m={happy:'<path d="M135 285 Q150 305 165 285Z" fill="#8a2a3a" stroke="#2a1420" stroke-width="3"/>',
+  sad:'<path d="M138 296 Q150 282 162 296" stroke="#2a1420" stroke-width="4" fill="none"/>',
+  shock:'<ellipse cx="150" cy="292" rx="9" ry="14" fill="#8a2a3a" stroke="#2a1420" stroke-width="3"/>',
+  smirk:'<path d="M136 290 Q156 296 168 282" stroke="#2a1420" stroke-width="4" fill="none"/>',
+  blank:'<path d="M138 290 H162" stroke="#2a1420" stroke-width="4"/>'}[e];
+ return eye(122)+eye(178)+m+'<ellipse cx="106" cy="272" rx="12" ry="7" fill="#ff7a9a" opacity=".45"/><ellipse cx="194" cy="272" rx="12" ry="7" fill="#ff7a9a" opacity=".45"/>'}
+function sprite(id,e){
+ if(id==='W')return `<svg viewBox="0 0 300 600"><g filter="url(#crisp)"><path d="M60 470 Q40 360 110 330 Q160 290 215 335 Q265 380 240 470 Q150 520 60 470Z" fill="#d9944a"/><path d="M95 345 Q100 400 118 430 Q135 400 130 340Z M180 340 Q190 400 205 440 Q222 390 215 350Z" fill="#b3201a"/></g><circle cx="130" cy="400" r="${e==='blank'?8:15}" fill="#fff"/><circle cx="185" cy="400" r="${e==='blank'?8:15}" fill="#fff"/><circle cx="130" cy="402" r="5" fill="#000"/><circle cx="185" cy="402" r="5" fill="#000"/><path d="M130 440 Q158 ${e==='sad'?430:465} 190 440" stroke="#4a1a08" stroke-width="5" fill="none"/></svg>`;
+ const c=C[id];
+ const back=c.t==='pony'?`<path d="M215 170 Q300 200 280 360 Q250 300 225 250Z" fill="${c.h}"/>`:`<path d="M65 200 Q60 360 105 330 L195 330 Q240 360 235 200 Q150 80 65 200Z" fill="${c.h}"/>`;
+ const gl=id==='N'?'<g stroke="#222" stroke-width="4" fill="rgba(180,230,255,.25)"><circle cx="122" cy="248" r="26"/><circle cx="178" cy="248" r="26"/><path d="M148 248h4"/></g>':id==='K'?'<rect x="94" y="234" width="112" height="26" rx="9" fill="#050508"/>':'';
+ return `<svg viewBox="0 0 300 600"><g filter="url(#grain)">${back}
+ <path d="M60 600 Q60 385 150 365 Q240 385 240 600Z" fill="${c.s}"/><path d="M120 370 L150 410 L180 370Z" fill="#fff" opacity=".8"/>
+ ${id==='M'?'<rect x="170" y="440" width="46" height="22" rx="4" fill="#fff"/><text x="177" y="456" font-size="12" fill="#c33" font-family="Arial">MIKA</text>':''}
+ <rect x="132" y="300" width="36" height="75" fill="${c.k}"/>
+ <ellipse cx="150" cy="245" rx="64" ry="74" fill="${c.k}"/>
+ <path d="M80 235 Q82 140 150 140 Q218 140 220 235 Q205 185 150 190 Q100 185 80 235Z" fill="${c.h}"/>
+ ${id==='M'?'<path d="M150 140 Q130 185 112 200 Q140 180 150 190Z" fill="'+c.h+'"/>':''}</g>
+ ${face(e,c.k)}${gl}</svg>`}
+
+const N={};
+const WH={M:'Mika',N:'Noor',G:'Chef Gus',K:'Agent Kell',W:'Wingy',Y:'You'},XP={h:'happy',s:'sad',x:'shock',m:'smirk',b:'blank'};
+(function(S){S.trim().split('\n').forEach(l=>{const[id,w,t,nx,ch,ex,cs]=l.split('|'),o={who:WH[w]||w||'',t:t||'',next:nx||null};
+ if(ch)o.ch=ch;(ex||'').split(';').forEach(p=>{if(!p)return;const[k,v]=p.split('=');if(k=='end')o.end=[+v.split(':')[0],v.split(':')[1]];else o[k]=v===undefined?1:v});
+ if(cs)o.choices=cs.split('~').map(x=>x.split('>'));N[id]=o})})(`
+start||Friday, 11:47 PM. Wingstead 24/7: a diner that smells like fryer oil and bad decisions.|a2|-|bg=diner;mu=jazz
+a2||You ordered the Boneless Wings: Sauce of the Week. A perfectly normal wing. Probably.|a3|M.h.r
+a3|M|Order up! Boneless wings, Sauce of the Week. I'm legally required to say "enjoy!"|a4
+a4|Y|Legally required?|a5
+a5|M|Corporate got new lawyers. Anyway! Eat up, hon.|a6|M.m.r
+a6|N|WAIT. Don't. Don't eat that!|a7|N.x.l M.m.r
+a7|Y|...Excuse me?|a8
+a8|N|I'm Noor. I'm... okay, I'm the reason that sauce exists. Partly. I did the chemistry.|hub1|N.s.l M.m.r
+hub1||The wing glistens under the fluorescent lights. It looks smug. The clock over the grill reads 11:52.||||Ask Noor about the sauce>n1>!aN~Ask Mika about the sauce>m1>!aM~Peek into the kitchen>g1>!aG~Look out the window>k1>!aK~Check your phone>ph1>!aP~I've heard enough. Decide.>hub2
+n1|N|Carolina Reaper, honey garlic, and a trace of Compound Omega. It was a tuition thing.|n2|N.s.l M.m.r|set=aN
+n2|N|Omega is the most energetic compound ever made. One bite and digestion goes exponential.|n3|N.x.l M.m.r
+n3|Y|Exponential like how?|n4
+n4|N|Like "Earth stops being a planet" exponential. Also, Omega hates dairy. Something creamy might buffer it.|n5|N.s.l M.m.r
+n5|M|Noor's eaten here every night for a month. I think she likes me. Or the wings.|n6|N.x.l M.h.r
+n6|N|MIKA.|hub1|N.s.l M.h.r
+m1|M|Honey, garlic, and one (1) singularity. Ranch is on the side. Free refills.|m2|N.s.l M.m.r|set=aM
+m2|N|WHY IS THE RANCH ON THE SIDE?!|m3|N.x.l M.m.r
+m3|M|It's a side. That's where sides go.|m4
+m4|M|Real talk, hon. Three years I've worked here. Tonight the walk-in fridge hummed. Like a choir.|m5|N.s.l M.s.r
+m5|M|Everything's weirdly alive tonight. Even the wings look at me.|hub1|N.s.l M.m.r
+g1||You slip behind the counter. A mountain of a man stares into a fryer like it owes him money.|g2|G.s.c|bg=back
+g2|G|Name's Gus. Thirty years on the fryer. Never seen oil go purple before.|g3
+g3|G|That Omega crud Noor dumped in the batch? The oil sings. Keep it away from heat. Or heat is exactly what it wants.|g4|G.x.c
+g4|G|If it ever comes to it, kid, this fryer's rated for anything. Anything.|g5|G.m.c|set=aG
+g5||You nod. The fryer hums back, ominously.|hub1|N.s.l M.m.r|bg=diner
+k1||Headlights sweep the lot. A black sedan parks across two spaces. Someone in sunglasses, at midnight, walks in.|k2|N.x.l M.x.r
+k2|K|Evening. Agent Kell, Department of Condiments. Which of you ordered the Sauce of the Week?|k3|K.b.c N.x.l M.x.r
+k3|K|That sauce is a Class-Omega Culinary Hazard. A single bite and, well. Read the briefing.|k4
+k4|K|Short version: it ends the world. Long version: it ends the world, but flavorfully.|k5|K.m.c|set=aK
+k5|K|I'm authorized to confiscate it. But I've had a long week. Think about it.|hub1|K.m.c N.s.l M.m.r
+ph1||Trending: #WingShortage. Reports of "something humming" at every wing joint on Earth.|ph2
+ph2||One post: "If you see a boneless wing glowing, DO NOT TAKE A PHOTO." Four million likes. Your thumb hovers over the camera.|hub1||set=aP
+hub2||11:57 PM. Three minutes. The wing steams quietly. Everyone is staring at you.||N.s.l M.m.r|bg=diner;fx=none;mu=jazz|Eat it>eat~Don't eat it>noeat~Do something weird>weird~Gather everyone and fix this>true1>aN&aM&aG&aK&aW
+eat||How do you want to do this?||||Take a big bite>bite~Take a tiny nibble>tiny~Dunk it in ranch first>r1>aN&aM
+noeat||Fair enough. Then what?||||Push the plate away>p1~Share it with Mika and Noor>sh1~Hand it to Agent Kell>kell1>aK~Throw it in the fryer>fry1>aG~Walk out of the diner>lv1
+weird||Okay. Strange it is.||||Post it online>vir1>aP~Take it to Noor's lab>lab1>aN~Talk to the wing>wt1~Throw it out the window>win1~Confess your feelings to Mika>mk1>aM
+bite||You lift the wing. It's warm, and perfect. Noor yells "Don't!" but you've already bitten down.|b2|N.x.l M.x.r
+b2||...It is the best thing you have ever tasted.|b3
+b3|W|Thank you for choosing me.|b4|N.x.l W.b.c M.x.r|fx=glitch;mu=tense
+b4|W|I have waited four and a half billion years for somebody to try me.|b5
+b5|W|Just Wingy. Just Wingy. JUST WINGY.|b6||bg=space
+b6||Somewhere inside you, the sauce begins to compute.|b7
+b7|||||boom;end=1:Flavor Country
+tiny||You take the tiniest nibble. A mouse could have done it.|tiny2|N.x.l M.x.r
+tiny2|W|A nibble? Interesting. Time gets confused by small bites.|tiny3|N.x.l W.b.c M.x.r|fx=glitch;mu=tense
+tiny3||The diner flickers. The clock rewinds. Noor says, "Don't eat that!" for the second time.|tiny4
+tiny4|||||calm;end=19:Groundhog Wing;msg=IT IS 11:47 PM. AGAIN.
+p1|Y|I'll pass. Take it away.|p2|N.h.l M.h.r
+p2|M|Wasting wings is a crime, hon. Employee discount.|p3|N.h.l M.m.r
+p3|N|Mika, NO, that's the one with the Omega in it!|p4|N.x.l M.m.r
+p4||*chomp*|p5|N.x.l M.x.r
+p5|M|...Huh. Tastes like honey, garlic, and the end of everything. Five stars.|p6||fx=glitch
+p6|||||boom;end=2:Employee Discount;msg=MIKA GAVE IT FIVE STARS.
+sh1|Y|If this thing is going to end the world, it can do it with friends.|sh2
+sh2|N|...That is the dumbest and most beautiful thing I've ever heard.|sh3|N.h.l M.h.r
+sh3|M|Three forks. One wing. Nobody let go of the plate.|sh4
+sh4||Three bites at once. Entangled, hungry, and slightly terrified.|sh5|N.x.l W.x.c M.x.r|fx=glitch;mu=tense
+sh5|W|Wait. Three-way entanglement? That is NOT in my script.|sh6
+sh6|W|Probability averaged out. The universe is... fine. Whatever.|sh7|N.h.l W.s.c M.m.r|fx=none;mu=calm
+sh7|M|Great. So who's paying?|sh8
+sh8|||||calm;end=3:Split the Check;msg=EARTH: STILL HERE. BILL: $47.
+r1|Y|Ranch first. Twice.|r2
+r2|N|Colloidal buffering! It works! It actually works!|r3|N.h.l W.s.c M.x.r|mu=calm
+r3|W|Cool. Creamy. Defeated.|r4
+r4|M|Refills are free, remember?|r5|N.h.l W.s.c M.h.r
+r5|||||calm;end=4:Ranch Saves All;msg=THE WORLD IS SAVED BY DAIRY.
+kell1|Y|Agent Kell. Take it. Please.|kell2|K.m.c N.s.l M.s.r
+kell2|K|Thank you. Protocol says I must hold it, label it, and never, ever...|kell3
+kell3|K|...hm. It smells incredible. Purely for evidence, I'll test the flavor.|kell4|K.x.c N.x.l M.x.r
+kell4|N|Agent, that is NOT protocol!|kell5
+kell5|K|Department of Condiments. We write the protocol.|kell6||fx=glitch;mu=tense
+kell6|||||boom;end=5:Classified Flavor;msg=KELL: FLAVOR CONFIRMED. CASE CLOSED.
+fry1|Y|Gus. Is it true the fryer can handle anything?|fry2|G.m.c|bg=back
+fry2|G|Kid, that fryer survived the Great Pickle Incident of 2009. Your call.||G.m.c||Drop it in the fryer>fry4~Ask Gus to eat it instead>gus1
+fry4||The wing hits the oil. The oil turns purple, then gold. The kitchen smells like victory.|fry5|G.x.c|mu=calm
+fry5|G|Kid... it's making fries. Omega fries. They're already perfect.|fry6|G.h.c
+fry6|M|We're never going out of business again.|fry7
+fry7|||||calm;end=6:Deep Fried;msg=THE WORLD'S BEST FRIES SAVED THE WORLD.
+gus1|G|Me? ...Fine. Thirty years of fryer fumes. My stomach's seen worse.|gus2|G.m.c
+gus2||Gus bites. Chews. Swallows. Everyone braces.|gus3|G.b.c|mu=tense
+gus3|G|Needs salt.|gus4|G.m.c|mu=calm
+gus4|N|His digestive tract is a CONTAINMENT FACILITY.|gus5|N.x.l G.m.c M.x.r
+gus5|||||calm;end=17:Iron Stomach;msg=GUS REMAINS UNIMPRESSED.
+lv1||You stand, leave a ten on the table, and walk out. Mika calls after you, "Wait, your wings!"|lv2|N.x.l M.x.r
+lv2||The night air is cool. You go home, watch a documentary about owls, and sleep like a rock.|lv3|-|bg=space
+lv3|||||calm;end=13:Ordinary Night;msg=YOU NEVER FOUND OUT. THE WING IS FINE. PROBABLY.
+vir1|Y|Hold on. This lighting is perfect.|vir2|N.x.l M.x.r
+vir2||You snap the photo. Caption: "midnight wings are so back." Four million likes in a minute.|vir3||bg=space;mu=tense
+vir3||Every wing joint on Earth, then every cook with a fryer, tries the sauce. At once.|vir4
+vir4|||||boom;end=7:Going Viral;msg=THE ALGORITHM LOVED IT. SO DID EVERYONE.
+lab1|N|Fine. My lab's in the back. Mika, lock the doors.|lab2|N.h.c|bg=back;mu=tense
+lab2||Noor's lab is a supply closet with a hot plate and a Marie Curie poster. She slides the wing under a lamp.|lab3
+lab3|N|I can seal it, or I can find out whether I'm right. Honestly, I'm dying to know. Your call.||N.s.c||Seal it in containment>lab5~Take a bite for science>lab7~Let Noor test it on herself>nr1
+lab5||You seal it in a titanium lunchbox. Noor stamps it with seventeen warning labels.|lab6|N.h.c|mu=calm
+lab6|||||calm;end=8:Peer Reviewed;msg=THE WING NOW LIVES IN A MUSEUM OF BAD IDEAS.
+lab7||You take a bite. Noor scribbles notes. "Fascinating. The reaction is... how long do you have?"|lab8|N.x.c|mu=tense
+lab8|N|Oh no. I forgot the buffer.|lab9
+lab9|||||boom;end=9:Controlled Experiment;msg=NOOR'S HYPOTHESIS WAS CORRECT.
+nr1|N|I've dreamed of this. Hold my helmet.|nr2|N.h.c
+nr2||Noor puts on a welding helmet, a snorkel, and oven mitts. She bites.|nr3|N.b.c|mu=tense
+nr3|N|Pure umami... and a trace of regret. I think the helmet worked?|nr4|N.x.c|mu=calm
+nr4|||||calm;end=16:Nobel Flavor;msg=NOOR WON THE NOBEL PRIZE IN FLAVOR.
+win1|Y|Out the window it goes!|win2|N.x.l M.x.r
+win2||The wing arcs past the neon and lands in the parking lot. A pigeon tilts its head.|win3|-|bg=space;mu=tense
+win3||The pigeon eats. The pigeon coos. The pigeon begins to glow.|win4
+win4|||||boom;end=12:Pigeon Problem;msg=A PIGEON ENDED THE WORLD.
+mk1|Y|Mika, can I tell you something before the world ends?|mk2|M.x.r
+mk2|M|Oh! Hon, I've waited three years for somebody to say "before the world ends."|mk3|M.h.r
+mk3|Y|I think I like you. A lot.|mk4
+mk4|M|Okay. I get off in four minutes. The wing can wait. You can't.|mk5|M.h.r|mu=calm
+mk5||You leave the wing on the counter. You and Mika watch the sunrise from the roof of her car.|mk6|-|bg=space
+mk6|||||calm;end=15:Mika's Heart;msg=THE WING WAS FORGOTTEN. SO WAS THE APOCALYPSE.
+wt1|Y|...Hello?|wt2|N.x.l M.x.r
+wt2|W|Oh! Someone finally asked.|wt3|N.x.l W.h.c M.x.r|fx=glitch;set=aW
+wt3|W|I'm not a monster. I'm a wing. I never asked to be eaten. I'm just very, very delicious.|wt4|N.s.l W.s.c M.s.r
+wt4|W|Nobody asks what I want. They only ask what I taste like. What do YOU want?||W.s.c||Promise never to eat it>wt5~Propose marriage>wp1~Eat it anyway>wb1~Delete Wingy>del1~Ask it to wait while you think>hub2
+wt5|Y|I promise. Nobody eats you.|wt6
+wt6|W|...Really? You'd let a wing just exist?|wt7|N.h.l W.h.c M.h.r|mu=calm;fx=none
+wt7||Wingy cools down. The glow fades. It sits on the plate, a perfectly ordinary wing, forever.|wt8
+wt8|||||calm;end=10:Wing Whisperer;msg=THE WING LIVES. THE WORLD LIVES.
+wp1|Y|Wingy. Will you marry me?|wp2|N.x.l W.x.c M.x.r|fx=none
+wp2|W|I thought you'd never ask. I'm a lot, I know. Crispy outside, sentient inside.|wp3|N.x.l W.h.c M.x.r|mu=calm
+wp3|M|I'll cater.|wp4|N.x.l W.h.c M.h.r
+wp4|N|I guess I'll be the maid of honor?|wp5
+wp5|||||calm;end=14:Wing Wedding;msg=THE WING HAS A SPOUSE. THE EARTH HAS A WEDDING.
+wb1|Y|Sorry, buddy. Delicious wins.|wb2|N.x.l W.s.c M.x.r
+wb2|W|...I understand. Please, savor me.|wb3||mu=tense
+wb3|||||boom;end=11:Betrayal;msg=WINGY FORGAVE YOU. THE EARTH DID NOT.
+del1||You press Escape. A menu appears: "Delete Wingy? (y/n)". It was never in the original game.|del2||fx=glitch;mu=tense
+del2|W|THIS IS NOT A MENU. THIS IS MY MENU. JUST WINGY. JUST WINGY. JUST WINGY.|del3|W.b.c|bg=space
+del3||Mika, Noor and everyone else are gone. There is only one wing. It is smiling.|del4|W.b.l
+del4|||||boom;end=18:Just Wingy;msg=JUST WINGY.
+true1|Y|Everyone, listen up. We can fix this. All of us.|true2|N.h.l M.h.r
+true2|N|Omega hates dairy. Mika, bring the ranch!|true3|N.h.l M.h.r
+true3|G|And I'll fry something cool for the aftertaste.|true4|G.m.c N.h.l|bg=back
+true4|K|The Department of Condiments covers the bill. Don't ask how.|true5|K.m.c M.h.r|bg=diner
+true5|W|You are all... helping me? Nobody has ever...|true6|W.s.c N.h.l M.h.r|fx=glitch
+true6|W|Then I do not need to be dangerous. I can just be a wing.|true7|W.h.c|fx=none;mu=calm
+true7||The glow fades. Dawn breaks over Wingstead 24/7. A perfectly ordinary wing sits steaming on the plate.|true8|N.h.l W.h.c M.h.r
+true8|M|Well? Somebody has to try it.|true9
+true9||You take a bite. It's just a wing. Honey, garlic, a crispy edge. It's wonderful.|true10
+true10|||||calm;end=20:Good Taste;msg=THE TRUE ENDING. EVERYONE ATE WINGS.
+`);
+const PF=Object.assign({spd:60,auto:50,vol:60,gl:1},(()=>{try{return JSON.parse(localStorage.getItem('wgp')||'{}')}catch(e){return{}}})());let snap,doneAt=0,auto=0,skip=0,menu=0,pg=0,gt='pf';
+const flags={},F={};try{Object.assign(F,JSON.parse(localStorage.getItem('wg')||'{}'))}catch(e){}
+let cur='start',chars={},typing=0,full='',timer=0,lock=false,playing=false;
+const stage=$('stage');
+function parseCh(s){chars={};if(s==='-')return;s.split(' ').forEach(p=>{const[a,e,pos]=p.split('.');chars[a]={e:XP[e],pos}})}
+function renderChars(){const P={l:'20%',c:'50%',r:'80%'};$('chars').innerHTML=Object.entries(chars).map(([id,o])=>`<div class="ch p-${o.pos} ${id==='W'?'w':''}">${sprite(id,o.e)}</div>`).join('')}
+function show(id){
+ snap={id,f:{...flags},bg:curBG,ch:JSON.stringify(chars),m:mood,g:stage.classList.contains('glitch')?1:0};cur=id;const n=N[id];if(n.bg)setBG(n.bg);if(n.ch!==undefined){parseCh(n.ch);renderChars()}
+ if(n.set)n.set.split(',').forEach(k=>flags[k]=1);if(n.mu)music(n.mu);
+ if(n.fx==='glitch'){if(PF.gl)stage.classList.add('glitch')}else if(n.fx)stage.classList.remove('glitch');
+ if(n.boom||n.calm){return finale(n)}
+ $('box').classList.remove('hide');$('qm').classList.remove('hide');$('choices').style.display='none';
+ $('name').style.display=n.who?'block':'none';$('name').textContent=n.who;
+ $('txt').className=n.who?'':'nar';full=n.t;$('txt').textContent='';typing=0;$('next').style.display='none';
+ clearInterval(timer);timer=setInterval(()=>{typing++;$('txt').textContent=full.slice(0,typing);if(typing>=full.length){clearInterval(timer);done()}},Math.max(2,60-PF.spd*.58))}
+function done(){doneAt=Date.now();const n=N[cur];$('next').style.display=n.choices?'none':'block';if(n.choices)setTimeout(choices,350,n)}
+function choices(n){if(N[cur]!==n)return;const c=$('choices');c.innerHTML='';
+ n.choices.forEach(([l,t,need])=>{if(need&&!need.split('&').every(f=>f[0]=='!'?!flags[f.slice(1)]:flags[f]))return;const b=document.createElement('button');b.textContent=l;b.onclick=e=>{e.stopPropagation();c.style.display='none';show(t)};c.appendChild(b)});c.style.display='flex'}
+function advance(){if(!playing||lock||menu)return;const n=N[cur];if(typing<full.length){clearInterval(timer);typing=full.length;$('txt').textContent=full;done();return}
+ if(n.next)show(n.next)}
+stage.addEventListener('click',()=>{auto=skip=0;qs();advance()});
+addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();advance()}});
+
+function earth(c,x,y,r,t,crack){
+ c.save();c.beginPath();c.arc(x,y,r,0,7);c.clip();
+ let g=c.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);g.addColorStop(0,'#5ab6ff');g.addColorStop(1,'#0b2a6b');c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r);
+ c.fillStyle='#3f9a4a';for(let i=0;i<7;i++){const a=i*1.9+t*.0004;c.beginPath();c.ellipse(x+Math.cos(a)*r*.55,y+Math.sin(i*2.3)*r*.5,r*.28,r*.17,i,0,7);c.fill()}
+ c.fillStyle='rgba(255,255,255,.35)';for(let i=0;i<6;i++){c.beginPath();c.ellipse(x+Math.sin(i*3+t*.0007)*r*.6,y+Math.cos(i*5)*r*.6,r*.3,r*.06,i,0,7);c.fill()}
+ if(crack){c.strokeStyle='#ffb040';c.lineWidth=4;c.shadowColor='#f60';c.shadowBlur=20;for(let i=0;i<9;i++){c.beginPath();c.moveTo(x,y);let px=x,py=y,a=i*.7;for(let k=0;k<6;k++){a+=Math.sin(i*k)*.5;px+=Math.cos(a)*r*crack/5;py+=Math.sin(a)*r*crack/5;c.lineTo(px,py)}c.stroke()}}
+ c.restore()}
+function finale(n){
+ music(n.boom?'doom':'calm');lock=true;$('box').classList.add('hide');$('qm').classList.add('hide');$('choices').style.display='none';$('chars').style.opacity=0;
+ const fx=$('fx'),c=fx.getContext('2d'),por=stage.clientHeight>stage.clientWidth,W=por?H:W,H=por?W:H;fx.width=W;fx.height=H;fx.classList.remove('hide');setBG('space');
+ const P=[];for(let i=0;i<320;i++){const a=Math.random()*6.28,s=2+Math.random()*14;P.push({x:W/2,y:H/2,vx:Math.cos(a)*s,vy:Math.sin(a)*s,col:['#ff9a2e','#ffe066','#4aa8ff','#4aa84a','#fff'][i%5],r:2+Math.random()*5})}
+ const t0=performance.now();
+ (function f(now){const t=now-t0;c.clearRect(0,0,W,H);
+  if(n.boom){
+   const sh=t<2000?t/2000*14:0;c.save();c.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+   if(t<2300){earth(c,W/2,H/2,170,t,Math.min(1,t/2000));if(t>1000){c.fillStyle=`rgba(255,80,0,${(t-1000)/4000})`;c.fillRect(0,0,W,H)}}
+   c.restore();
+   if(t>2000&&t<2500){c.fillStyle=`rgba(255,255,255,${1-(t-2000)/500})`;c.fillRect(0,0,W,H)}
+   if(t>=2300){P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.985;p.vy*=.985;c.globalAlpha=Math.max(0,1-(t-2300)/2600);c.fillStyle=p.col;c.beginPath();c.arc(p.x,p.y,p.r,0,7);c.fill()});c.globalAlpha=1}
+   if(t>H/20){c.fillStyle='#fff';c.font=(por?'bold 28px':'bold 44px')+' Impact,sans-serif';c.textAlign='center';c.globalAlpha=Math.min(1,(t-H/20)/700);c.fillText((n.msg||'THE EARTH HAS BEEN BLOWN UP.'),W/2,H/2);c.globalAlpha=1}
+   if(t>6000)return fin(n)}
+  else{earth(c,W/2,H/2,150,t,0);for(let i=0;i<14;i++){c.fillStyle=`rgba(255,255,200,${Math.abs(Math.sin(t/300+i))})`;c.fillRect(W/2+Math.cos(i*1.7)*230,H/2+Math.sin(i*2.9+t/900)*150,5,5)}
+   c.fillStyle='#fff';c.font=(por?'bold 21px':'bold 34px')+' Trebuchet MS,sans-serif';c.textAlign='center';c.fillText((n.msg||'EARTH: STILL HERE.'),W/2,H-90);if(t>4500)return fin(n)}
+  requestAnimationFrame(f)})(t0)}
+function fin(n){$('fx').classList.add('hide');stage.classList.remove('glitch');F[n.end[0]]=n.end[1];try{localStorage.setItem('wg',JSON.stringify(F))}catch(e){}
+ $('en').textContent='ENDING '+n.end[0]+' / 20';$('et').textContent=n.end[1];
+ $('el').textContent='Endings found: '+Object.keys(F).length+' / 20. '+Object.values(F).join(', ')
+ $('end').style.display='flex'}
+$('go').onclick=e=>{e.stopPropagation();begin()};
+$('again').onclick=e=>{e.stopPropagation();$('end').style.display='none';begin()};
+function begin(){$('title').style.display='none';$('end').style.display='none';$('chars').style.opacity=1;$('fx').classList.add('hide');for(const k in flags)delete flags[k];playing=true;lock=false;startMusic();music('jazz');show('start')}
+let AC,MG,mus=1,mood='jazz',st=0,nt=0;
+const SC={jazz:{b:112,r:48,w:'triangle',c:[[0,4,7,11],[5,9,12,16],[7,11,14,17],[0,4,7,11]],m:[19,21,23,26,24,23,21,19]},
+tense:{b:92,r:45,w:'sawtooth',c:[[0,3,7],[0,3,6],[-2,3,7],[-4,0,3]],m:[24,27,26,24,22,24,27,31]},
+calm:{b:72,r:55,w:'sine',c:[[0,4,7,12],[5,9,12],[7,11,14],[0,4,7]],m:[24,28,26,24,26,28,31,36]},
+doom:{b:60,r:31,w:'sawtooth',c:[[0,1],[0,1],[0,1],[0,1]],m:[12,13,12,13,12,13,12,18]}};
+function music(m){mood=m}
+function nv(f,t,d,y,v){const o=AC.createOscillator(),g=AC.createGain();o.type=y;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(MG);o.start(t);o.stop(t+d)}
+function sched(){while(nt<AC.currentTime+.25){const s=SC[mood],b=30/s.b,i=st%32,ch=s.c[i>>3],h=m=>440*2**((s.r+m-69)/12);
+ if(i%8==0)ch.forEach(n=>nv(h(n+12),nt,b*7,s.w,.035));
+ if(i%2==0)nv(h(ch[0]-12),nt,b*1.8,'sine',.16);
+ if(i%4==0&&mood!='calm')nv(65,nt,.12,'sine',.2);
+ if(i%2&&Math.random()<.7)nv(h(s.m[i%8]),nt,b*1.5,'square',.02);
+ st++;nt+=b}}
+function startMusic(){if(AC){AC.resume();return}AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.gain.value=PF.vol/100*.6;MG.connect(AC.destination);nt=AC.currentTime+.1;setInterval(sched,80)}
+
+function qs(){$('qa').classList.toggle('on',!!auto);$('qk').classList.toggle('on',!!skip)}
+function setVol(){if(MG)MG.gain.value=PF.vol/100*.6}
+function SV(){try{return JSON.parse(localStorage.getItem('wgs')||'{}')}catch(e){return{}}}
+function saveSlot(k){const t=document.createElement('canvas');t.width=192;t.height=108;t.getContext('2d').drawImage(bgc,0,0,192,108);const S=SV();S[k]=Object.assign({},snap,{t:t.toDataURL('image/jpeg',.6),d:new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),x:(N[snap.id].t||'').slice(0,40)});try{localStorage.setItem('wgs',JSON.stringify(S))}catch(e){}}
+function loadSlot(k){const d=SV()[k];if(!d)return;closeGM();$('title').style.display='none';$('end').style.display='none';$('fx').classList.add('hide');$('chars').style.opacity=1;for(const x in flags)delete flags[x];Object.assign(flags,d.f);setBG(d.bg);chars=JSON.parse(d.ch);renderChars();stage.classList.toggle('glitch',!!d.g);music(d.m);playing=true;lock=false;auto=skip=0;qs();startMusic();show(d.id)}
+function slots(){const S=SV();let h=`<h3>${gt=='save'?'Save':'Load'}</h3><div class=sg>`;for(let i=pg*6;i<pg*6+6;i++){const d=S[i];h+=`<div class=sl data-i=${i}>${d?`<img src="${d.t}"><b>${i+1}. ${d.d}</b><i>${d.x}</i>`:`<div class=em>Empty Slot</div><b>${i+1}.</b>`}</div>`}
+ $('gc').innerHTML=h+'</div><div class=pgr>'+[0,1].map(p=>`<button data-p=${p} class="${p==pg?'on':''}">Page ${p+1}</button>`).join('')+'</div>'}
+function tab(t){gt=t;[...$('gn').children].forEach(b=>b.classList.toggle('on',b.dataset.t==t));const c=$('gc');
+ if(t=='pf')c.innerHTML='<h3>Preferences</h3>'+[['Text Speed','spd'],['Auto-Forward Time','auto'],['Music Volume','vol']].map(([l,k])=>`<label>${l}<input type=range min=0 max=100 value=${PF[k]} data-k=${k}></label>`).join('')+`<label><input type=checkbox data-k=gl ${PF.gl?'checked':''}> Glitch effects</label><div><button class=btn id=fsb>Fullscreen</button><button class=btn id=rst>Erase saves and endings</button></div>`;
+ else if(t=='end')c.innerHTML='<h3>Endings '+Object.keys(F).length+' / 20</h3><p>'+(Object.values(F).join(' · ')||'None yet.')+'</p>';
+ else if(t=='save'&&!playing)c.innerHTML='<h3>Save</h3><p>Nothing to save yet. Start a game first.</p>';else slots()}
+function openGM(t){menu=1;$('gm').style.display='flex';tab(t)}
+function closeGM(){menu=0;$('gm').style.display='none'}
+function mm(){closeGM();playing=false;clearInterval(timer);auto=skip=0;qs();['box','qm','fx'].forEach(x=>$(x).classList.add('hide'));$('choices').style.display='none';$('end').style.display='none';$('chars').innerHTML='';stage.classList.remove('glitch');$('title').style.display='flex';music('jazz')}
+$('gm').onclick=e=>{e.stopPropagation();const b=e.target.closest('button,.sl');if(!b)return;
+ if(b.dataset.t)tab(b.dataset.t);else if(b.id=='gr')closeGM();else if(b.id=='gmm')mm();
+ else if(b.classList.contains('sl')){const i=+b.dataset.i;if(gt=='save'){saveSlot(i);slots()}else loadSlot(i)}
+ else if(b.dataset.p!==undefined){pg=+b.dataset.p;slots()}
+ else if(b.id=='fsb'){try{document.documentElement.requestFullscreen()}catch(x){}}
+ else if(b.id=='rst'){if(b.dataset.s){try{localStorage.removeItem('wgs');localStorage.removeItem('wg')}catch(x){}for(const k in F)delete F[k];tab('pf')}else{b.dataset.s=1;b.textContent='Tap again to erase'}}};
+$('gm').oninput=e=>{const k=e.target.dataset.k;PF[k]=e.target.type=='checkbox'?+e.target.checked:+e.target.value;try{localStorage.setItem('wgp',JSON.stringify(PF))}catch(x){}setVol()};
+$('qm').onclick=e=>{e.stopPropagation();const b=e.target.closest('button');if(!b)return;if(b.id=='qa'){auto=!auto;skip=0}else if(b.id=='qk'){skip=!skip;auto=0}else if(b.dataset.g)openGM(b.dataset.g);qs()};
+$('tl').onclick=e=>{e.stopPropagation();openGM('load')};$('tp').onclick=e=>{e.stopPropagation();openGM('pf')};
+addEventListener('keydown',e=>{if(e.key=='Escape'){menu?closeGM():openGM('pf')}});
+setInterval(()=>{if(!playing||lock||menu)return;if(skip){advance();if(N[cur].choices&&typing>=full.length){skip=0;qs()}}else if(auto&&typing>=full.length&&!N[cur].choices&&Date.now()-doneAt>4000-PF.auto*35)advance()},110);
+setBG('diner');
+</script></body></html>
